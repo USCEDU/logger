@@ -6,6 +6,7 @@ import (
 	"net"
 	"runtime"
 	"time"
+	"strings"
 )
 
 type Logger interface {
@@ -54,20 +55,20 @@ func (this logger) Log(level string, f string, v ...interface{}) {
 		this.tag,
 		now.Format("2006-01-02 15:04:05.000"),
 		level)
-
-	pc, file, line, _ := runtime.Caller(1)
-	funcInfo := runtime.FuncForPC(pc)
-	logPos := fmt.Sprintf("FUNC:%s@LINE:%d@FILE:%s", funcInfo.Name(), line, file)
-
+	var logPos string
+	if strings.ToLower(level) == "error" || strings.ToLower(level) == "warn" {
+		pc, file, line, _ := runtime.Caller(3)
+		funcInfo := runtime.FuncForPC(pc)
+		logPos = fmt.Sprintf(" %s@%s:%d ", funcInfo.Name(), file, line)
+	}
 	if this.console {
-		log.Println(head, logPos, msg)
+		log.Println(head, msg, logPos)
 	}
 
 	if this.addr != nil {
 		go func() {
 			data := []byte(head)
-			data = append(data, []byte(logPos+msg)...)
-			//data = append(data, )
+			data = append(data, []byte(msg+logPos)...)
 			this.conn.Write(data)
 		}()
 	}
