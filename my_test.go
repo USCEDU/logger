@@ -5,7 +5,7 @@ import (
 )
 
 func TestNewLogger(t *testing.T){
-	l := NewLogger("test", "192.168.5.70:3232", true)
+	l := NewLogger("test", "127.0.0.1:3232", true)
 	if l == nil{
 		t.Error("construct logger failed")
 	}else{
