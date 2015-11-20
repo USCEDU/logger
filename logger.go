@@ -5,8 +5,8 @@ import (
 	"log"
 	"net"
 	"runtime"
-	"time"
 	"strings"
+	"time"
 )
 
 type Logger interface {
@@ -21,20 +21,48 @@ type logger struct {
 	conn    *net.UDPConn
 	console bool
 	tag     string
+	level   int
 }
 
-func NewLogger(tag string, addr string, console bool) Logger {
+const (
+	INFO  = 3
+	WARN  = 4
+	ERROR = 5
+)
+
+func levelStr2N(str string) int {
+	rv := -1
+	switch {
+	case strings.EqualFold(str, "INFO"):
+		rv = INFO
+	case strings.EqualFold(str, "WARN"):
+		rv = WARN
+	case strings.EqualFold(str, "ERROR"):
+		rv = ERROR
+	}
+	return rv
+}
+
+func NewLoggerEx(tag string, addr string, console bool, level string) Logger {
 	ret := new(logger)
 	ret.console = console
 	ret.tag = tag
 	if addr == "" {
 		return ret
 	}
+
+	ret.level = levelStr2N(level)
+	if ret.level == -1 {
+		log.Printf("unkown level(%s)\n", level)
+		return nil
+	}
+
 	serverAddr, err := net.ResolveUDPAddr("udp", addr)
 	if err != nil {
 		log.Println("can not resolve udp address", addr, err.Error())
 		return nil
 	}
+
 	ret.addr = serverAddr
 	ret.conn, err = net.DialUDP("udp", nil, ret.addr)
 	if err != nil {
@@ -44,10 +72,20 @@ func NewLogger(tag string, addr string, console bool) Logger {
 	return ret
 }
 
+func NewLogger(tag string, addr string, console bool, level string) Logger {
+	return NewLoggerEx(tag, addr, console, "INFO")
+}
+
 func (this logger) Log(level string, f string, v ...interface{}) {
 	if !this.console && this.addr == nil {
 		return
 	}
+
+	curLevel := levelStr2N(level)
+	if curLevel < this.level {
+		return
+	}
+
 	now := time.Now()
 	msg := fmt.Sprintf(f, v...)
 	//log formate [APP name] [Log time] [Log message]
