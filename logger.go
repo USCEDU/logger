@@ -72,7 +72,7 @@ func NewLoggerEx(tag string, addr string, console bool, level string) Logger {
 	return ret
 }
 
-func NewLogger(tag string, addr string, console bool, level string) Logger {
+func NewLogger(tag string, addr string, console bool) Logger {
 	return NewLoggerEx(tag, addr, console, "INFO")
 }
 
