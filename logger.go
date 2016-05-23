@@ -24,6 +24,13 @@ type logger struct {
 	level   int
 }
 
+type LoggerInfo struct {
+	Address    string
+	LogLevel   string
+	ServerName string
+	Console    bool
+}
+
 const (
 	INFO  = 3
 	WARN  = 4
