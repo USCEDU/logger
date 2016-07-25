@@ -107,7 +107,7 @@ func (this logger) Log(level string, f string, v ...interface{}) {
 		logPos = fmt.Sprintf(" %s@%s:%d ", funcInfo.Name(), file, line)
 	}
 	if this.console {
-		log.Println(head, msg, logPos)
+		fmt.Println(head, msg, logPos)
 	}
 
 	if this.addr != nil {
