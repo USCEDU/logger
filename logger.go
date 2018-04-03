@@ -11,8 +11,9 @@ import (
 
 type Logger interface {
 	Log(level string, fmt string, v ...interface{})
-	LogE(fmt string, v ...interface{})
+	LogD(fmt string, v ...interface{})
 	LogI(fmt string, v ...interface{})
+	LogE(fmt string, v ...interface{})
 	LogW(fmt string, v ...interface{})
 }
 
@@ -32,6 +33,7 @@ type LoggerInfo struct {
 }
 
 const (
+	DEBUG = 2
 	INFO  = 3
 	WARN  = 4
 	ERROR = 5
@@ -40,6 +42,8 @@ const (
 func levelStr2N(str string) int {
 	rv := -1
 	switch {
+	case strings.EqualFold(str, "DEBUG"):
+		rv = DEBUG
 	case strings.EqualFold(str, "INFO"):
 		rv = INFO
 	case strings.EqualFold(str, "WARN"):
@@ -54,9 +58,6 @@ func NewLoggerEx(tag string, addr string, console bool, level string) Logger {
 	ret := new(logger)
 	ret.console = console
 	ret.tag = tag
-	if addr == "" {
-		return ret
-	}
 
 	ret.level = levelStr2N(level)
 	if ret.level == -1 {
@@ -74,8 +75,8 @@ func NewLoggerEx(tag string, addr string, console bool, level string) Logger {
 	ret.conn, err = net.DialUDP("udp", nil, ret.addr)
 	if err != nil {
 		log.Println("can not dial udp to", addr, err.Error())
-		return nil
 	}
+
 	return ret
 }
 
@@ -84,7 +85,7 @@ func NewLogger(tag string, addr string, console bool) Logger {
 }
 
 func (this logger) Log(level string, f string, v ...interface{}) {
-	if !this.console && this.addr == nil {
+	if !this.console {
 		return
 	}
 
@@ -129,4 +130,8 @@ func (this logger) LogW(fmt string, v ...interface{}) {
 
 func (this logger) LogI(fmt string, v ...interface{}) {
 	this.Log("INFO", fmt, v...)
+}
+
+func (this logger) LogD(fmt string, v ...interface{}) {
+	this.Log("DEBUG", fmt, v...)
 }
