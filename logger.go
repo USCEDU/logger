@@ -112,11 +112,11 @@ func (this logger) Log(level string, f string, v ...interface{}) {
 	}
 
 	if this.addr != nil {
-		go func() {
-			data := []byte(head)
-			data = append(data, []byte(msg+logPos)...)
-			this.conn.Write(data)
-		}()
+		//go func() {
+		data := []byte(head)
+		data = append(data, []byte(msg+logPos)...)
+		this.conn.Write(data)
+		//}()
 	}
 }
 
